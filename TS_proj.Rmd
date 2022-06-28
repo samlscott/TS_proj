@@ -14,7 +14,7 @@ Author1: Samantha Scott
 Ref1: Stellenbosch University, Cape Town, South Africa
 Email1: 20945043\@sun.ac.za
 CorrespAuthor_1: yes
-keywords: Econometrics \sep Time Series \sep VAR \sep Blanchard-Quah
+keywords: Econometrics \sep Time Series \sep VAR \sep SVAR \sep Blanchard-Quah
 BottomRFooter: \footnotesize Page \thepage
 addtoprule: yes
 addfootrule: yes
@@ -94,6 +94,9 @@ Real_interest1 <- Real_interest[1:188,]
 price_deflator1 <- price_deflator[1:188,]
 ```
 
+```{r}
+Real_interest1$year<- as.yearqtr(paste0(Real_interest1$year, "-", Real_interest1$quarter))
+```
 
 # Introduction
 
@@ -115,6 +118,7 @@ real_gdp1 <- as.data.frame(diff_by_hand) # this is the change in y_t
 real_gdp1 <- real_gdp1[-1,]
 ```
 
+# Data 
 
 ```{r}
 
@@ -126,17 +130,17 @@ r_t <- ts(Real_interest1$Real_interest_rate, start (1960,2))
 ```{r}
 # Plot the Series
 #ts_plot(y_t)
-plot(y_t)
+#plot(y_t, main = "First difference of logged real GDP", xlab = "Time", ylab = "")
 ```
 
 ```{r}
 #ts_plot(g_t)
-plot(g_t)
+#plot(g_t, main = "Ratio of government expenditure to GDP", xlab = "Time", ylab = "")
 ```
 
 ```{r}
 #ts_plot(r_t)
-plot(r_t)
+#plot(r_t, main = "Real interest rate", xlab = "Time", ylab = "")
 ```
 
 
@@ -151,7 +155,7 @@ amat[3,2] <- NA
 ```
 
 
-```{r echo = FALSE}
+```{r}
 
 #Building the model
 
@@ -166,66 +170,103 @@ Model1 <- VAR(sv2, p = 3, season = NULL, type = "const")
 SVARMod1 <- SVAR(Model1, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
 ```
 
-# IRFs
+
+## Variables and VAR Forecasting
+
+```{r}
+library(svars)
+forecast <- predict(Model1, n.ahead = 4, ci = 0.95)
+fanchart(forecast, names = "y_t")
+```
+
+```{r}
+fanchart(forecast, names = "g_t")
+```
+
+```{r}
+fanchart(forecast, names = "r_t")
+```
+
+# Impulse Response Functions
 
 ## Impulse Response of real GDP for each of the identified shocks
 
 ```{r}
 SVARy_t <- irf(SVARMod1, impulse = "y_t", response = "y_t", n.ahead = 100)
-plot(SVARy_t)
+plot(SVARy_t, ylab="")
 ```
 
 ```{r}
 SVARy_t <- irf(SVARMod1, impulse = "g_t", response = "y_t", n.ahead = 100)
-plot(SVARy_t)
+plot(SVARy_t, ylab="")
 ```
 
 ```{r}
 SVARy_t <- irf(SVARMod1, impulse = "r_t", response = "y_t", n.ahead = 100)
-plot(SVARy_t)
+plot(SVARy_t, ylab="")
 ```
 
 ## Impulse Response of the real interest rate  for each of the identified shocks
 
 ```{r}
 SVARr_t <- irf(SVARMod1, impulse = "y_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t)
+plot(SVARr_t, ylab="")
 
 ```
 
 ```{r}
 SVARr_t <- irf(SVARMod1, impulse = "g_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t)
+plot(SVARr_t, ylab="")
 
 ```
 
 ```{r}
 SVARr_t <- irf(SVARMod1, impulse = "r_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t)
+plot(SVARr_t, ylab="")
 
 ```
 
-## IRF of the government consumption to real GDP for each of the identified shocks
+## Impulse Response of the government consumption to real GDP for each of the identified shocks
 
 ```{r}
 SVARg_t <- irf(SVARMod1, impulse = "y_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t)
+plot(SVARg_t, ylab="")
 ```
 
 ```{r}
 SVARg_t <- irf(SVARMod1, impulse = "g_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t)
+plot(SVARg_t, ylab="")
 ```
 
 ```{r}
 SVARg_t <- irf(SVARMod1, impulse = "r_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t)
+plot(SVARg_t, ylab="")
 ```
 
+# Variance Decomposition 
+
+"The variance decomposition indicates the amount of information each variable contributes to the other variables in the autoregression. It determines how much of the forecast error variance of each of the variables can be explained by exogenous shocks to the other variables."
+
+# Historical Decomposition 
+
+
+# Robustness Checks
+
+```{r}
+# calculation inflation
+
+```
+
+
+# Conclusion 
+
+\newpage
 
 # Reference List
 
 Du Plessis, S., Smit, B. and Sturzenegger, F., 2008. Identifying aggregate supply and demand shocks in South Africa. Journal of African economies, 17(5), pp.765-793.
+
+\newpage
 
 # Appendix 
 
@@ -242,3 +283,11 @@ library(tseries)
 adf.test(g_g_not_s$Value)
 ```
 
+
+## Variance Decomposition Results 
+
+```{r}
+library(vars)
+var_dec <- fevd(SVARMod1, n.ahead = 20)
+plot(var_dec)
+```

@@ -124,3 +124,28 @@ adf.test(Real_interest1$Real_interest_rate)
 library(tseries)
 adf.test(g_g_not_s$Value)
 
+
+# Historical decomposition
+amat1 <- diag(3)
+amat1[1,2] <- NA
+amat1[1,3] <- NA
+amat1[2,1] <- NA
+amat1[2,3] <- NA
+amat1[3,1] <- NA
+amat1[3,2] <- NA
+amat1
+
+#Building the model
+library(svars)
+n_sv <- cbind(y_t,g_t,r_t)
+n_sv1 <- sv[-1,]
+n_sv2 <- sv1[-187,]
+colnames(sv2) <- cbind("y_t", "g_t", "r_t")
+
+lagselect <- VARselect(sv2, lag.max = 8, type = "both")
+
+n_Model1 <- VAR(n_sv2, p = 3, season = NULL, type = "const")
+n_SVARMod1 <- SVAR(n_Model1, Amat = amat1, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
+
+hist_decomp <- hd(n_SVARMod1)
+

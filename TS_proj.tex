@@ -194,7 +194,7 @@ South Africa}
 
 \begin{keyword}
 \footnotesize{
-Econometrics \sep Time Series \sep VAR \sep Blanchard-Quah \\
+Econometrics \sep Time Series \sep VAR \sep SVAR \sep Blanchard-Quah \\
 \vspace{0.3cm}
 }
 \end{keyword}
@@ -235,46 +235,72 @@ The paper, \emph{Identifying aggregate supply and demand shocks in South
 Africa}, is an application of a structural VAR method to identify supply
 and demand shocks for the South African economy since the 1960s.
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-9-1.pdf}
+\hypertarget{data}{%
+\section{Data}\label{data}}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-10-1.pdf}
+\hypertarget{variables-and-var-forecasting}{%
+\subsection{Variables and VAR
+Forecasting}\label{variables-and-var-forecasting}}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-11-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-15-1.pdf}
 
-\hypertarget{irfs}{%
-\section{IRFs}\label{irfs}}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-16-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-17-1.pdf}
+
+\hypertarget{impulse-response-functions}{%
+\section{Impulse Response Functions}\label{impulse-response-functions}}
 
 \hypertarget{impulse-response-of-real-gdp-for-each-of-the-identified-shocks}{%
 \subsection{Impulse Response of real GDP for each of the identified
 shocks}\label{impulse-response-of-real-gdp-for-each-of-the-identified-shocks}}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-14-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-18-1.pdf}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-15-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-19-1.pdf}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-16-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-20-1.pdf}
 
 \hypertarget{impulse-response-of-the-real-interest-rate-for-each-of-the-identified-shocks}{%
 \subsection{Impulse Response of the real interest rate for each of the
 identified
 shocks}\label{impulse-response-of-the-real-interest-rate-for-each-of-the-identified-shocks}}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-17-1.pdf}
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-18-1.pdf}
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-19-1.pdf}
-
-\hypertarget{irf-of-the-government-consumption-to-real-gdp-for-each-of-the-identified-shocks}{%
-\subsection{IRF of the government consumption to real GDP for each of
-the identified
-shocks}\label{irf-of-the-government-consumption-to-real-gdp-for-each-of-the-identified-shocks}}
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-20-1.pdf}
-
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-21-1.pdf}
 
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+\hypertarget{impulse-response-of-the-government-consumption-to-real-gdp-for-each-of-the-identified-shocks}{%
+\subsection{Impulse Response of the government consumption to real GDP
+for each of the identified
+shocks}\label{impulse-response-of-the-government-consumption-to-real-gdp-for-each-of-the-identified-shocks}}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-25-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-26-1.pdf}
+
+\hypertarget{variance-decomposition}{%
+\section{Variance Decomposition}\label{variance-decomposition}}
+
+``The variance decomposition indicates the amount of information each
+variable contributes to the other variables in the autoregression. It
+determines how much of the forecast error variance of each of the
+variables can be explained by exogenous shocks to the other variables.''
+
+\hypertarget{historical-decomposition}{%
+\section{Historical Decomposition}\label{historical-decomposition}}
+
+\hypertarget{robustness-checks}{%
+\section{Robustness Checks}\label{robustness-checks}}
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+\newpage
 
 \hypertarget{reference-list}{%
 \section{Reference List}\label{reference-list}}
@@ -282,6 +308,8 @@ shocks}\label{irf-of-the-government-consumption-to-real-gdp-for-each-of-the-iden
 Du Plessis, S., Smit, B. and Sturzenegger, F., 2008. Identifying
 aggregate supply and demand shocks in South Africa. Journal of African
 economies, 17(5), pp.765-793.
+
+\newpage
 
 \hypertarget{appendix}{%
 \section{Appendix}\label{appendix}}
@@ -315,6 +343,12 @@ economies, 17(5), pp.765-793.
 ## Dickey-Fuller = -0.66065, Lag order = 5, p-value = 0.9724
 ## alternative hypothesis: stationary
 \end{verbatim}
+
+\hypertarget{variance-decomposition-results}{%
+\subsection{Variance Decomposition
+Results}\label{variance-decomposition-results}}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-29-1.pdf}
 
 \bibliography{Tex/ref}
 
