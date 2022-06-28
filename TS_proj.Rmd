@@ -1,92 +1,39 @@
 ---
-# IMPORTANT: Change settings here, but DO NOT change the spacing.
-# Remove comments and add values where applicable.
-# The descriptions below should be self-explanatory
-
-title: "Title"
-#subtitle: "This will appear as Right Header"
-
-documentclass: "elsarticle"
-
-# --------- Thesis title (Optional - set to FALSE by default).
-# You can move the details below around as you please.
-Thesis_FP: FALSE
-# Entry1: "An unbelievable study with a title spanning multiple lines."
-# Entry2: "\\textbf{Nico Katzke}" # textbf for bold
-# Entry3: "A thesis submitted toward the degree of Doctor of Philosophy"
-# Uni_Logo: Tex/Logo.png # Place a logo in the indicated location (from your root, e.g. defaults to ~/Tex/Logo.png) and uncomment this line. Leave uncommented for no image
-# Logo_width: 0.3 # If using a logo - use this to set width (size) of image
-# Entry4: "Under the supervision of: \\vfill Prof. Joe Smith and Dr. Frank Smith"
-# Entry5: "Stellenbosch University"
-# Entry6: April 2020
-# Entry7:
-# Entry8:
-
-# --------- Front Page
-# Comment: ----- Follow this pattern for up to 5 authors
-AddTitle: TRUE # Use FALSE when submitting to peer reviewed platform. This will remove author names.
-Author1: "Samantha Scott"  # First Author - note the thanks message displayed as an italic footnote of first page.
-Ref1: "Stellenbosch University, Cape Town, South Africa" # First Author's Affiliation
-Email1: "20945043\\@sun.ac.za" # First Author's Email address
-
-
-
-CorrespAuthor_1: TRUE  # If corresponding author is author 3, e.g., use CorrespAuthor_3: TRUE
-
-# Comment out below to remove both. JEL Codes only given if keywords also given.
-keywords: "Multivariate GARCH \\sep Kalman Filter \\sep Copula" # Use \\sep to separate
-JELCodes: "L250 \\sep L100"
-
-# ----- Manage headers and footers:
-#BottomLFooter: $Title$
-#BottomCFooter:
-#TopLHeader: \leftmark # Adds section name at topleft. Remove comment to add it.
-BottomRFooter: "\\footnotesize Page \\thepage" # Add a '#' before this line to remove footer.
-addtoprule: TRUE
-addfootrule: TRUE               # Use if footers added. Add '#' to remove line.
-
-# --------- page margins:
-margin: 2.3 # Sides
-bottom: 2 # bottom
-top: 2.5 # Top
-HardSet_layout: TRUE # Hard-set the spacing of words in your document. This will stop LaTeX squashing text to fit on pages, e.g.
-# This is done by hard-setting the spacing dimensions. Set to FALSE if you want LaTeX to optimize this for your paper.
-
-# --------- Line numbers
-linenumbers: FALSE # Used when submitting to journal
-
-# ---------- References settings:
-# You can download cls format here: https://www.zotero.org/ - simply search for your institution. You can also edit and save cls formats here: https://editor.citationstyles.org/about/
-# Hit download, store it in Tex/ folder, and change reference below - easy.
-bibliography: Tex/ref.bib       # Do not edit: Keep this naming convention and location.
-csl: Tex/harvard-stellenbosch-university.csl # referencing format used.
-# By default, the bibliography only displays the cited references. If you want to change this, you can comment out one of the following:
-#nocite: '@*' # Add all items in bibliography, whether cited or not
-# nocite: |  # add specific references that aren't cited
-#  @grinold2000
-#  @Someoneelse2010
-
-# ---------- General:
-RemovePreprintSubmittedTo: TRUE  # Removes the 'preprint submitted to...' at bottom of titlepage
-Journal: "Journal of Finance"   # Journal that the paper will be submitting to, if RemovePreprintSubmittedTo is set to TRUE.
-toc: FALSE                       # Add a table of contents
-numbersections: TRUE             # Should sections (and thus figures and tables) be numbered?
-fontsize: 11pt                  # Set fontsize
-linestretch: 1.2                # Set distance between lines.
-link-citations: TRUE            # This creates dynamic links to the papers in reference list.
-
-### Adding additional latex packages:
-# header-includes:
-#    - \usepackage{colortbl} # Add additional packages here.
-
+title: 'Replication: Identifying Aggregate Supply and Demand Shocks in South Africa'
+documentclass: elsarticle
+Thesis_FP: no
 output:
   pdf_document:
-    keep_tex: TRUE
+    keep_tex: yes
     template: Tex/TexDefault.txt
-    fig_width: 3.5 # Adjust default figure sizes. This can also be done in the chunks of the text.
+    fig_width: 3.5
     fig_height: 3.5
-abstract: |
-  Abstract to be written here. The abstract should not be too long and should provide the reader with a good understanding what you are writing about. Academic papers are not like novels where you keep the reader in suspense. To be effective in getting others to read your paper, be as open and concise about your findings here as possible. Ideally, upon reading your abstract, the reader should feel he / she must read your paper in entirety.
+  html_document:
+    df_print: paged
+Author1: Samantha Scott
+Ref1: Stellenbosch University, Cape Town, South Africa
+Email1: 20945043\@sun.ac.za
+CorrespAuthor_1: yes
+keywords: Econometrics \sep Time Series \sep VAR \sep Blanchard-Quah
+BottomRFooter: \footnotesize Page \thepage
+addtoprule: yes
+addfootrule: yes
+margin: 2.3
+bottom: 2
+top: 2.5
+HardSet_layout: yes
+linenumbers: no
+bibliography: Tex/ref.bib
+csl: Tex/harvard-stellenbosch-university.csl
+RemovePreprintSubmittedTo: yes
+Journal: Journal of Finance
+toc: no
+numbersections: yes
+fontsize: 11pt
+linestretch: 1.2
+link-citations: yes
+AddTitle: yes
+#always_allow_html: true
 ---
 
 <!-- First: Set your default preferences for chunk options: -->
@@ -110,10 +57,188 @@ write_rds(Example_data, path = "data/Example_data.rds")
 
 ```
 
-
 <!-- ############################## -->
+
 <!-- # Start Writing here: -->
+
 <!-- ############################## -->
 
-# Introduction 
+```{r}
+# load packages
+library(urca)
+library(vars)
+library(tseries)
+library(TSstudio)
+library(forecast)
+library(tidyverse)
+```
+
+```{r}
+# importing data
+library(readr)
+gdp <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/gdp.csv")
+price_deflator <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/price_deflator.csv")
+g_g_not_s <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/g_g_not_s.csv")
+Real_interest <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/Real_interest.csv")
+```
+
+```{r}
+gdp1 <- gdp[1:188,]
+```
+
+```{r}
+Real_interest1 <- Real_interest[1:188,]
+```
+
+```{r}
+price_deflator1 <- price_deflator[1:188,]
+```
+
+
+# Introduction
+
+The paper, *Identifying aggregate supply and demand shocks in South Africa*, is an application of a structural VAR method to identify supply and demand shocks for the South African economy since the 1960s. 
+
+```{r}
+# creating real_gdp df
+real_gdp <- gdp1$ZAFGDPNQDSMEI/price_deflator1$ZAFGDPDEFQISMEI
+realgdp <- as.data.frame(real_gdp)
+```
+
+```{r}
+# first diff of the log of real gdp (change in yt)
+y_t1 <- log(realgdp)
+
+# Calculate the first difference of AirPass using lag and subtraction
+diff_by_hand <- y_t1$real_gdp - lag(y_t1$real_gdp)
+real_gdp1 <- as.data.frame(diff_by_hand) # this is the change in y_t
+real_gdp1 <- real_gdp1[-1,]
+```
+
+
+```{r}
+
+y_t <- ts(real_gdp1, start (1960,2))
+g_t <- ts(g_g_not_s$Value, start (1960,2))
+r_t <- ts(Real_interest1$Real_interest_rate, start (1960,2))
+```
+
+```{r}
+# Plot the Series
+#ts_plot(y_t)
+plot(y_t)
+```
+
+```{r}
+#ts_plot(g_t)
+plot(g_t)
+```
+
+```{r}
+#ts_plot(r_t)
+plot(r_t)
+```
+
+
+```{r echo = FALSE}
+
+# Restrictions 
+
+amat <- diag(3)
+amat[2,1] <- NA
+amat[3,1] <- NA
+amat[3,2] <- NA
+```
+
+
+```{r echo = FALSE}
+
+#Building the model
+
+sv <- cbind(y_t,g_t,r_t)
+sv1 <- sv[-1,]
+sv2 <- sv1[-187,]
+colnames(sv2) <- cbind("y_t", "g_t", "r_t")
+
+lagselect <- VARselect(sv2, lag.max = 8, type = "both")
+
+Model1 <- VAR(sv2, p = 3, season = NULL, type = "const")
+SVARMod1 <- SVAR(Model1, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
+```
+
+# IRFs
+
+## Impulse Response of real GDP for each of the identified shocks
+
+```{r}
+SVARy_t <- irf(SVARMod1, impulse = "y_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t)
+```
+
+```{r}
+SVARy_t <- irf(SVARMod1, impulse = "g_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t)
+```
+
+```{r}
+SVARy_t <- irf(SVARMod1, impulse = "r_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t)
+```
+
+## Impulse Response of the real interest rate  for each of the identified shocks
+
+```{r}
+SVARr_t <- irf(SVARMod1, impulse = "y_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t)
+
+```
+
+```{r}
+SVARr_t <- irf(SVARMod1, impulse = "g_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t)
+
+```
+
+```{r}
+SVARr_t <- irf(SVARMod1, impulse = "r_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t)
+
+```
+
+## IRF of the government consumption to real GDP for each of the identified shocks
+
+```{r}
+SVARg_t <- irf(SVARMod1, impulse = "y_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t)
+```
+
+```{r}
+SVARg_t <- irf(SVARMod1, impulse = "g_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t)
+```
+
+```{r}
+SVARg_t <- irf(SVARMod1, impulse = "r_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t)
+```
+
+
+# Reference List
+
+Du Plessis, S., Smit, B. and Sturzenegger, F., 2008. Identifying aggregate supply and demand shocks in South Africa. Journal of African economies, 17(5), pp.765-793.
+
+# Appendix 
+
+## Testing for Stationarity
+
+```{r}
+library(tseries)
+adf.test(real_gdp1)
+
+library(tseries)
+adf.test(Real_interest1$Real_interest_rate)
+
+library(tseries)
+adf.test(g_g_not_s$Value)
+```
 
