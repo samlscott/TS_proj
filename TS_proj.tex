@@ -169,8 +169,8 @@
 
 \begin{frontmatter}  %
 
-\title{Replication: Identifying Aggregate Supply and Demand Shocks in
-South Africa}
+\title{A Replication: Identifying Aggregate Supply and Demand Shocks in
+SouthAfrica}
 
 % Set to FALSE if wanting to remove title (for submission)
 
@@ -186,7 +186,6 @@ South Africa}
 
 \address[Add1]{Stellenbosch University, Cape Town, South Africa}
 
-\cortext[cor]{Corresponding author: Samantha Scott}
 
 
 \vspace{1cm}
@@ -206,13 +205,15 @@ Econometrics \sep Time Series \sep VAR \sep SVAR \sep Blanchard-Quah \\
 \end{frontmatter}
 
 
+\renewcommand{\contentsname}{Table of Contents}
+{\tableofcontents}
 
 %________________________
 % Header and Footers
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \pagestyle{fancy}
 \chead{}
-\rhead{}
+\rhead{Innovation Accounting Replication and Robustness Checks}
 \lfoot{}
 \rfoot{\footnotesize Page \thepage}
 \lhead{}
@@ -228,33 +229,54 @@ Econometrics \sep Time Series \sep VAR \sep SVAR \sep Blanchard-Quah \\
 
 
 
+\newpage
+
+\newpage
+
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-The paper, \emph{Identifying aggregate supply and demand shocks in South
-Africa}, is an application of a structural VAR method to identify supply
+The paper \emph{Identifying aggregate supply and demand shocks in South
+Africa} is an application of a structural VAR method to identify supply
 and demand shocks for the South African economy since the 1960s. The aim
-of this paper is to replicate the paper by Du Plessis, Smit and
-Sturzenegger (2008), with
+of this investigation is to replicate the innovation accounting
+presented by Du Plessis, Smit and Sturzenegger (2007), with additional
+robustness checks. Using data found from an alternative source, it is
+evident that the model does not present the same results as the impulse
+response functions are significantly different to that of the original
+paper. As such, the results of this paper are not consistent with
+theoretical priors presented by Du Plessis, Smit and Sturzenegger
+(2007).
+
+After conducting several robustness checks, it is clear that the
+residuals of two of the main variables, namely the government
+consumption to GDP ratio as well as the real interest rate, are not
+white noise. It is also made evident that seasonally adjusting the real
+interest rate and differencing the variable by one to achieve
+stationarity significantly impacted the results of the model.
 
 \hypertarget{data}{%
 \section{Data}\label{data}}
 
-The data used is quarterly data from FRED, dating back to 1960 up until
-2007. Unlike the original paper, the data used is not seasonally
-adjusted. The variables used in the model are the first difference of
-the log of GDP (\(y_t\)), the ratio of government consumption to GDP
-(\(g_t\)), as well the real interest rate (\(r_t\)). \(r_t\) is
-calculated using the monthly nominal interest rate as well as the
-monthly CPI data. Below is the equation used to caluclate \(r_t\).
+The data used is quarterly data from FRED, dating back to the second
+quarter of 1960 up until 2007. Similarly to the original paper, a
+robustness check is conducted using a shorter sample is used from the
+fourth quarter of 1983. Unlike the original paper, the data used is not
+seasonally adjusted. The variables used in the model are the first
+difference of the log of real GDP (\(y_t\)), the ratio of government
+consumption to GDP (\(g_t\)), as well the real interest rate (\(r_t\)).
+\(r_t\) is calculated using the monthly nominal interest rate as well as
+the monthly CPI data. Below is the equation used to calculate \(r_t\).
 
 \[ r_t = ((1 + Avg(i_{mt-1}, i_{mt}, i_{mt+1}))/(1+(ln(CPI_{mt-2}) - ln(CPI_{mt+1}))) ^ 4 - 1)*100 \]
-Figures 1, 2 and 3 represent the variables used. As seen in the
-Appendix, when as Augmented Dickey-Fuller test is conducted, it is
+Figures 1, 2 and 3 represent the variables used in the model. As seen in
+the Appendix, when an Augmented Dickey-Fuller test is conducted, it is
 evident that \(y_t\) is stationary, as the p-value is less than 0.05.
 However, both \(g_t\) and \(r_t\) are non-stationary. In the original
-paper (2007), \(r_t\) is stationary. This may be due to the data used
-for this paper not being seasonally adjusted.
+paper (2007), \(r_t\) is stationary. To test the impact of the
+difference between the \(r_t\) variables, a robustness check is
+conducted where the real interest rate is seasonally adjusted and made
+stationary.
 
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-12-1.pdf}
 
@@ -268,98 +290,127 @@ for this paper not being seasonally adjusted.
 A structural VAR model is created to identify supply and demand shocks
 for the South African economy since the 1960s. The demand the variables,
 \(y_t\), \(g_t\) and \(r_t\) are proxies for a supply shock, a fiscal
-shock and a monetary shock, respectively.
+shock and a monetary shock, respectively. In the three variable model,
+Du Plessis, Smit and Sturzenegger (2007) present three restrictions
+necessary to identify the structural shocks and the dynamics of the
+structural system. The first two restrictions require that fiscal and
+monetary policy shocks have no long-run effects on real GDP. The final
+restriction in that the long run effect of monetary policy on the stance
+of fiscal policy is also restricted to zero. These restrictions create a
+lower-triangular matrix, which is replicated for this investigation. The
+reduced form VAR in this investigation was estimated with three lags.
+The original paper (2007), conducted the estimation using four lags. The
+results of the SVAR model are presented as impulse response functions,
+as well as through a variance decomposition.
 
 \hypertarget{results}{%
 \section{Results}\label{results}}
 
-The results of the model are presented as impulse response functions.
+This section is a discussion of the results, as well as a comparison to
+those of Du Plessis, Smit and Sturzenegger (2007). The authors make use
+of innovation accounting, which entails the consideration of the impulse
+response and variance decomposition of SVAR models. The first step of
+innovation accounting is to inspect the impulse response functions of
+the identified shocks to determine whether they match theoretical priors
+about discretion and magnitude of impact. The results of the model using
+the longer dataset (1960+) are presented as impulse response functions
+in the subsections below.
 
 \hypertarget{impulse-response-of-real-gdp-for-each-of-the-identified-shocks}{%
 \subsection{Impulse Response of real GDP for each of the identified
 shocks}\label{impulse-response-of-real-gdp-for-each-of-the-identified-shocks}}
 
+In the original paper (2007), the impulse response functions of real GDP
+for each of the identified shocks are consistent with theoretical
+priors. The supply shock has a permanent impact on real GDP, while the
+demand shocks have transitionary impacts. In opposition, the results of
+this paper indicates that the the supply shock has a transitory impact
+while the demand shocks have permanent, negative impacts on real GDP.
+
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-18-1.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-18-2.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-18-3.pdf}
+
+\newpage
 
 \hypertarget{impulse-response-of-the-real-interest-rate-for-each-of-the-identified-shocks}{%
 \subsection{Impulse Response of the real interest rate for each of the
 identified
 shocks}\label{impulse-response-of-the-real-interest-rate-for-each-of-the-identified-shocks}}
 
+The impulse response functions in the original paper suggest that a
+positive supply shock raises the real interest rate temporarily. This is
+also indicated in the results of this investigation, however, the real
+interest rate is slower to respond to the rise in the supply shock than
+in the original paper. Du Plessis, Smit and Sturzenegger (2007) find
+that positive fiscal shock lowers the real interest rate temporarily,
+which indicates that a fiscal stimulus is met with accomodating monetary
+policy. However, this is not the result of this investigation. As
+indicated below, a positive fiscal shock results in a an increase in the
+real interest rate, which is slow to respond.
+
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-19-1.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-19-2.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-19-3.pdf}
+
+\newpage
 
 \hypertarget{impulse-response-of-the-government-consumption-to-real-gdp-for-each-of-the-identified-shocks}{%
 \subsection{Impulse Response of the government consumption to real GDP
 for each of the identified
 shocks}\label{impulse-response-of-the-government-consumption-to-real-gdp-for-each-of-the-identified-shocks}}
 
+Du Plessis, Smit and Sturzenegger (2007)'s results find that GDP
+responds faster to a positive supply shock than government expenditure.
+The results of this investigative present a similar result, as indicated
+in the impulse response functions below. However, a positive supply
+shock results in government expenditure to fall below zero before moving
+back towards zero. The impulse response functions of the investigation
+indicate that a positive supply shock results in government expenditure
+to rise before moving back to zero.
+
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-20-1.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-20-2.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-20-3.pdf}
 
+\newpage
+
 \hypertarget{variance-decomposition}{%
 \subsection{Variance Decomposition}\label{variance-decomposition}}
 
-``The variance decomposition indicates the amount of information each
-variable contributes to the other variables in the autoregression. It
-determines how much of the forecast error variance of each of the
-variables can be explained by exogenous shocks to the other variables.''
+A variance decomposition indicates the amount of information that each
+variable contributes to the other variables in the model. The variance
+decomposition therefore determines how much of the forecast error
+variance of each of the variables can be explained by exogenous shocks
+to the other variables (Lütkepohl, 2010).
+
+The variance decomposition of real GDP shows the proportion of the
+variance of real GDP which can be accounted for by the three identified
+shocks over various horizons. The first plot below is the variance
+decomposition of real GDP for the longer sample. The second plot
+presents the variance decomposition of real GDP for a shorter sample. In
+the larger sample, both \(g_t\) and \(r_t\) are initially dependent on
+the value they are set to be. However, as time passes, it is evident
+that \(g_t\) and \(r_t\) are impacted by \(y_t\).
 
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-21-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-22-1.pdf}
 
 \hypertarget{robustness-checks}{%
 \section{Robustness Checks}\label{robustness-checks}}
 
-\hypertarget{residuals}{%
-\subsection{Residuals}\label{residuals}}
+In this section, four robustness checks are conducted to test whether
+estimated effects of interest are sensitive to changes in model
+specifications. First, the real interest rate variable (\(r_t\)) is
+manually seasonally adjusted, and made stationary. Second, the residuals
+of the time series variables are investiagted in order to determine if
+they are white noise. Third, the number of lags specified in the model
+is altered. Lastly, a reduced sample (from the fourth quarter of 1983)
+is used in place of the larger sample.
 
-checking if residuals are white noise
-
-``The residuals are the differences between the fitted model and the
-data. In a signal-plus-white noise model, if you have a good fit for the
-signal, the residuals should be white noise.''
-
-Below is a check for residuals for the \(y_t\) variable. This helps to
-determine whether the residual are white noise.
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-22-1.pdf}
-
-Below is a check for residuals for the \(g_t\) variable.
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-23-1.pdf}
-
-Below is a check for residuals for the \(r_t\) variable.
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-24-1.pdf}
-
-\hypertarget{lag-selection}{%
-\subsection{Lag Selection}\label{lag-selection}}
-
-``Lütkepohl (1993) indicates that overfitting (selecting a higher order
-lag length than the true lag length) causes an increase in the
-mean-squareforecast errors of the VAR and that underfitting the lag
-length often generates autocorrelated errors.''
-
-The first set of Impulse Response Functions below are presented using a
-second SVAR model, where the number of lags selected is 6.
-
-\hypertarget{reduced-sample-from-last-quarter-1983}{%
-\subsection{Reduced Sample (from last quarter,
-1983)}\label{reduced-sample-from-last-quarter-1983}}
-
-As another robustness check, a smaller sample is used and the same
-method applied. As seen by the impulse response functions in the
-Appendix, using a smaller sample (1983+) does not significantly impact
-the results, as they are comparable to the impulse response functions of
-the larger sample (1960+).
-
-\hypertarget{removing-seasonality-and-making-real-interest-rate-stationary}{%
-\subsection{Removing seasonality and making Real Interest Rate
-Stationary}\label{removing-seasonality-and-making-real-interest-rate-stationary}}
+\hypertarget{removing-seasonality}{%
+\subsection{Removing Seasonality}\label{removing-seasonality}}
 
 For the last robustness check, the data used to calculate the real
 interest rate is seasonally adjusted. Further, the real interest rate
@@ -369,23 +420,134 @@ by 1 is stationary, with a p-value of 0.01 when an Aumented
 Dickey-Fuller test is conducted. The new real interest rate variable is
 depicted below:
 
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+As depicted by the impulse response function of the real interest rate
+for each of the identified shocks in the Appendix, the method of
+removing seasonality and making the variable \(r_t\) stationary, the new
+impulse response functions are more comparable to those of the original
+paper than previosuly. This indicates that removing seasonality from the
+main variables is essential.
+
+\hypertarget{residuals}{%
+\subsection{Residuals}\label{residuals}}
+
+As the next robustness check, the residuals of the variables \(y_t\),
+\(g_t\), \(r_t\), as well as the seasonally adjusted, normalised real
+interest rate variable are investigated in order to determine whether
+their respective residuals are white noise. White noise is defined as a
+time series that is purely random. The residuals are defined as the
+difference between the fitted model and the data. If the model is a good
+fit, the residuals should be white noise.
+
+\newpage
+
+Below is the result of a check for residuals for the \(y_t\) variable.
+As indicated by the figures, the residuals of \(y_t\) are white noise.
+The residuals are random, with no apparent trend. However, the
+autocorrelation in the second and third lags are significantly larger
+than zero. When conducting a Ljung\_Box test, the p-value in greater
+that 0.01. As such we cannot reject the null hypothesis, indicating that
+the time series does not contain an autocorrelation.
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-24-1.pdf}
+
+\newpage
+
+The figures below indicate that the residuals for the \(g_t\) variable
+are not white noise. When conducting a Ljung-Box test, the p-value is
+smaller than 0.01, thus we can reject the null hypothesis. Therefore,
+the time series does contain an autocorrelation and the residuals are
+not white noise.
+
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-25-1.pdf}
+
+\newpage
+
+The figures below are checks for residuals for the \(r_t\) variable. The
+figures indicate that the residuals are not white noise. The
+autocorrelation in all of the lags are larger than zero. The Ljung-Box
+test indicates that there is correlation in the time series, as the
+p-value is lower than 0.01.
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-26-1.pdf}
+
+\newpage
+
+The figures below present a check for residuals for an interest rate
+variable that has been seasonally adjusted and made stationary. The
+residuals seem to be random, without an apparent trend. The
+autocorrelation in the first two lags are greater than zero. When
+conducting a Ljung-Box test, the p-value is less than 0.01. As such, we
+can reject the null hypothesis. Therefore, the time series contains
+autocorrelation, and the residuals are not white noise.
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-27-1.pdf}
+
+\newpage
+
+\hypertarget{lag-selection}{%
+\subsection{Lag Selection}\label{lag-selection}}
+
+According to Ozcicek and Mcmillin (1999:517-518), overfitting, which
+entails selecting a higher order lag length than the true lag length,
+causes an increase in the mean-square forecast errors of the VAR.
+Underfitting the lag length results in autocorrelated errors. As such,
+it is important to test whether the number of lags selected may
+influence the results of the model.
+
+As another robustness check, additional models are generated with more
+and less variables than the initial model. First, a model with more lags
+(6) than the selected amount (3), and second, less lags (2) than the lag
+order selection number. As seen by the impulse response functions of
+these additional models, the results were not greatly impacted by a
+change in the number of lags.
+
+\hypertarget{reduced-sample}{%
+\subsection{Reduced Sample}\label{reduced-sample}}
+
+As another robustness check, a smaller sample is used, dating from the
+fourth quarter of 1963 to the last quarter of 2006. The same method is
+applied to assess whether the sample selected may alter the results. As
+seen by the impulse response functions in the Appendix, using a smaller
+sample (1983+) does not significantly impact the results, as they are
+comparable to the impulse response functions of the larger sample
+(1960+).
 
 \hypertarget{conclusion}{%
 \section{Conclusion}\label{conclusion}}
+
+This investigation served as an attempt to replicate the innovation
+accounting in Du Plessis, Smit and Sturzenegger (2007)'s paper, using
+data from an alternative source. A structural VAR method was applied to
+identify aggregate supply and aggregate demand shocks for the South
+African economy from the 1960s. The impulse response functions of this
+investigation differed from those of the original paper, resulting in
+the functions being inconsistent with theory. Additional robustness
+checks were conducted, for example a residual check, which revealed that
+two of the three main variables used in the model contain residuals that
+are not white noise. Other robustness checks altering lag selection, as
+well as reducing the sample, indicated that model specifications did not
+impact the results of the model. However, by altering the real interest
+rate for the variable to be seasonally adjusted and stationary the
+impulse response functions were impacted significantly.
 
 \newpage
 
 \hypertarget{reference-list}{%
 \section{Reference List}\label{reference-list}}
 
-Du Plessis, S., Smit, B. and Sturzenegger, F., 2008. Identifying
+Du Plessis, S., Smit, B. and Sturzenegger, F., 2007. Identifying
 aggregate supply and demand shocks in South Africa. Journal of African
-economies, 17(5), pp.765-793.
+economies, 17(5):765-793.
 
-Ozcicek, O. Lag Length Selection in Vector Autoregressive Models:
-Symmetric and Asymmetric Lags. Working Paper.
-\url{https://www.lsu.edu/business/economics/files/workingpapers/pap97_27.pdf}
+Lütkepohl, H. 2010. Variance Decomposition. In: Durlauf, S.N., Blume,
+L.E. (eds) Macroeconometrics and Time Series Analysis. The New Palgrave
+Economics Collection. Palgrave Macmillan, London.
+
+Ozcicek, O \& McMillin, W. D. 1999. Lag Length Selection in Vector
+Autoregressive Models: Symmetric and Asymmetric Lags. \emph{Applied
+Economics}, 31(4):517-524.
 
 \newpage
 
@@ -395,11 +557,11 @@ Symmetric and Asymmetric Lags. Working Paper.
 \hypertarget{forecast}{%
 \subsection{Forecast}\label{forecast}}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-26-1.pdf}
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-27-1.pdf}
-
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-28-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-29-1.pdf}
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-30-1.pdf}
 
 \hypertarget{testing-for-stationarity}{%
 \subsection{Testing for Stationarity}\label{testing-for-stationarity}}
@@ -467,79 +629,42 @@ Symmetric and Asymmetric Lags. Working Paper.
 ## alternative hypothesis: stationary
 \end{verbatim}
 
-\hypertarget{lag-selection-impulse-response-functions}{%
-\subsection{Lag Selection Impulse Response
-Functions}\label{lag-selection-impulse-response-functions}}
+\hypertarget{ljung-box-tests}{%
+\subsection{Ljung-Box Tests}\label{ljung-box-tests}}
 
-The set of Impulse Response Functions presented below are created using
-a second SVAR model, where the number of lags selected is 6.
+\begin{verbatim}
+## 
+##  Box-Ljung test
+## 
+## data:  y_t
+## X-squared = 0.63753, df = 1, p-value = 0.4246
+\end{verbatim}
 
-Impulse Response of the real GDP for each of the identified shocks:
+\begin{verbatim}
+## 
+##  Box-Ljung test
+## 
+## data:  g_t
+## X-squared = 179.82, df = 1, p-value < 2.2e-16
+\end{verbatim}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-30-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-30-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-30-3.pdf}
+\begin{verbatim}
+## 
+##  Box-Ljung test
+## 
+## data:  r_t
+## X-squared = 181.77, df = 1, p-value < 2.2e-16
+\end{verbatim}
 
-Impulse Response of the real interest rate for each of the identified
-shocks:
+\begin{verbatim}
+## 
+##  Box-Ljung test
+## 
+## data:  r_t_sa
+## X-squared = 56.161, df = 1, p-value = 6.672e-14
+\end{verbatim}
 
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-31-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-31-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-31-3.pdf}
-
-Impulse Response of the government consumption to real GDP for each of
-the identified shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-32-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-32-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-32-3.pdf}
-
-The set of Impulse Response Functions presented below are created using
-a third SVAR model, where the number of lags selected is 2.
-
-Impulse Response of the real GDP for each of the identified shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-33-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-33-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-33-3.pdf}
-
-Impulse Response of the real interest rate for each of the identified
-shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-34-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-34-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-34-3.pdf}
-
-Impulse Response of the government consumption to real GDP for each of
-the identified shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-35-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-35-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-35-3.pdf}
-
-\hypertarget{reduced-sample-impulse-response-functions}{%
-\subsection{Reduced Sample Impulse Response
-Functions}\label{reduced-sample-impulse-response-functions}}
-
-Impulse Response of real GDP for each of the identified shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-36-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-36-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-36-3.pdf}
-
-Impulse Response of the real interest rate for each of the identified
-shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-37-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-37-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-37-3.pdf}
-
-Impulse Response of the government consumption to real GDP for each of
-the identified shocks:
-
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-38-1.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-38-2.pdf}
-\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-38-3.pdf}
+\newpage
 
 \hypertarget{removing-seasonality-and-non-stationarity-impulse-response-functions}{%
 \subsection{Removing Seasonality and Non-stationarity Impulse Response
@@ -547,9 +672,35 @@ Functions}\label{removing-seasonality-and-non-stationarity-impulse-response-func
 
 Impulse Response of real GDP for each of the identified shocks:
 
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-36-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-36-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-36-3.pdf}
+\newpage Impulse Response of the real interest rate for each of the
+identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-37-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-37-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-37-3.pdf}
+\newpage Impulse Response of the government consumption to real GDP for
+each of the identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-38-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-38-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-38-3.pdf}
+
+\newpage
+
+\hypertarget{lag-selection-impulse-response-functions}{%
+\subsection{Lag Selection Impulse Response
+Functions}\label{lag-selection-impulse-response-functions}}
+
+Impulse Response of the real GDP for each of the identified shocks:
+
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-39-1.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-39-2.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-39-3.pdf}
+
+\newpage
 
 Impulse Response of the real interest rate for each of the identified
 shocks:
@@ -558,12 +709,64 @@ shocks:
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-40-2.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-40-3.pdf}
 
+\newpage
+
 Impulse Response of the government consumption to real GDP for each of
 the identified shocks:
 
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-41-1.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-41-2.pdf}
 \includegraphics{TS_proj_files/figure-latex/unnamed-chunk-41-3.pdf}
+
+\newpage
+
+Impulse Response of the real GDP for each of the identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-42-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-42-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-42-3.pdf}
+
+\newpage
+
+Impulse Response of the real interest rate for each of the identified
+shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-43-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-43-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-43-3.pdf}
+
+\newpage
+
+Impulse Response of the government consumption to real GDP for each of
+the identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-44-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-44-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-44-3.pdf}
+
+\newpage
+
+\hypertarget{reduced-sample-impulse-response-functions}{%
+\subsection{Reduced Sample Impulse Response
+Functions}\label{reduced-sample-impulse-response-functions}}
+
+Impulse Response of real GDP for each of the identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-45-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-45-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-45-3.pdf}
+\newpage Impulse Response of the real interest rate for each of the
+identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-46-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-46-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-46-3.pdf}
+\newpage Impulse Response of the government consumption to real GDP for
+each of the identified shocks:
+
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-47-1.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-47-2.pdf}
+\includegraphics{TS_proj_files/figure-latex/unnamed-chunk-47-3.pdf}
 
 \bibliography{Tex/ref}
 

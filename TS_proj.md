@@ -79,103 +79,31 @@ editor_options:
 
 <!-- If you want a chunk's code to be printed, set echo = TRUE. message = FALSE stops R printing ugly package loading details in your final paper too. I also suggest setting warning = FALSE and checking for warnings in R, else you might find ugly warnings in your paper. -->
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 5, fig.pos="H", fig.pos = 'H')
-# Note: Include = FALSE implies the code is executed, but not printed in your pdf.
-# warning and message = FALSE implies ugly messages and warnings are removed from your pdf.
-# These should be picked up when you execute the command chunks (code sections below) in your rmd, not printed in your paper!
 
-# Lets load in example data, and see how this can be stored and later called from your 'data' folder.
-if(!require("tidyverse")) install.packages("tidyverse")
-library(tidyverse)
-Example_data <- Texevier::Ex_Dat
-
-# Notice that as you are working in a .Rproj file (I am assuming you are) - the relative paths of your directories start at your specified root.
-# This means that when working in a .Rproj file, you never need to use getwd() - it is assumed as your base root automatically.
-write_rds(Example_data, path = "data/Example_data.rds")
-
-```
 
 \newpage 
 
-```{r}
-# load packages
-library(urca)
-library(vars)
-library(tseries)
-library(TSstudio)
-library(forecast)
-library(tidyverse)
-```
 
-```{r}
-# importing data
-library(readr)
-gdp <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/gdp.csv")
-price_deflator <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/price_deflator.csv")
-g_g_not_s <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/g_g_not_s.csv")
-Real_interest <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/Real_interest.csv")
-ri_sa <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/ri_sa.csv") #seasonally adjusted data
-```
 
-```{r}
-# Nominal GDP -> reducing to applicable years
-gdp1 <- gdp[1:188,]
-```
 
-```{r}
-# used to calculate real GDP
-price_deflator1 <- price_deflator[1:188,]
-```
 
-```{r}
-# creating real_gdp df
-real_gdp1 <- gdp1$ZAFGDPNQDSMEI/price_deflator1$ZAFGDPDEFQISMEI
-realgdp <- as.data.frame(real_gdp1)
-```
 
-```{r}
-# first diff of the log of real gdp (change in yt)
-y_t1 <- log(realgdp)
 
-# Calculate the first difference of AirPass using lag and subtraction
-real_gdp <- y_t1$real_gdp - lag(y_t1$real_gdp)
-real_gdp <- as.data.frame(real_gdp) # this is the change in y_t
-real_gdp1 <- real_gdp[-1,]
-```
 
-```{r}
-# reducing to applicable years
-Real_interest1 <- Real_interest[1:188,]
-ri_sa <- ri_sa[1:188,]
-```
 
-```{r}
-# joing year and quarter columns
-Real_interest1$year<- as.yearqtr(paste0(Real_interest1$year, "-", Real_interest1$quarter))
-```
 
-```{r}
-# making variables ts
-y_t <- ts(real_gdp1, start (1960,2))
-g_t <- ts(g_g_not_s$Value, start (1960,2))
-r_t <- ts(Real_interest1$Real_interest_rate, start (1960,2))
-r_t_sa <- ts(ri_sa$seasonally_differenced, start (1960,2)) # seasonally adjusted real interest rate
-```
 
-```{r}
-# reduced sample (+1983) from original sample (+1960)
-gg83 <- g_g_not_s[95:187,]
-ri83 <- Real_interest1[96:188,]
-rg83 <- real_gdp$real_gdp[96:188]
-```
 
-```{r}
-# reduced data variables 
-y_t83 <- ts(rg83, start (1983,4))
-g_t83 <- ts(gg83$Value, start (1983,4))
-r_t83 <- ts(ri83$Real_interest_rate, start (1983,4))
-```
+
+
+
+
+
+
+
+
+
+
 
 \newpage
 # Introduction
@@ -191,76 +119,17 @@ The data used is quarterly data from FRED, dating back to the second quarter of 
 $$ r_t = ((1 + Avg(i_{mt-1}, i_{mt}, i_{mt+1}))/(1+(ln(CPI_{mt-2}) - ln(CPI_{mt+1}))) ^ 4 - 1)*100 $$
 Figures 1, 2 and 3 represent the variables used in the model. As seen in the Appendix, when an Augmented Dickey-Fuller test is conducted, it is evident that $y_t$ is stationary, as the p-value is less than 0.05. However, both $g_t$ and $r_t$ are non-stationary. In the original paper (2007), $r_t$ is stationary. To test the impact of the difference between the $r_t$ variables, a robustness check is conducted where the real interest rate is seasonally adjusted and made stationary. 
 
-```{r}
-# Plot the Series
-#ts_plot(y_t)
-plot(y_t, main = "First difference of logged real GDP", sub = "Figure 1", xlab = "Time", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-12-1.pdf)<!-- --> 
 
-```{r}
-#ts_plot(g_t)
-plot(g_t, main = "Ratio of government expenditure to GDP", sub = "Figure 2", xlab = "Time", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-13-1.pdf)<!-- --> 
 
-```{r}
-#ts_plot(r_t)
-plot(r_t, main = "Real interest rate", sub = "Figure 3", xlab = "Time", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-14-1.pdf)<!-- --> 
 
-```{r echo = FALSE}
 
-# Restrictions 
 
-amat <- diag(3)
-amat[2,1] <- NA
-amat[3,1] <- NA
-amat[3,2] <- NA
 
-#Building the model
 
-sv <- cbind(y_t,g_t,r_t)
-sv1 <- sv[-1,]
-sv2 <- sv1[-187,]
-colnames(sv2) <- cbind("y_t", "g_t", "r_t")
 
-lagselect <- VARselect(sv2, lag.max = 8, type = "both")
-
-Model1 <- VAR(sv2, p = 3, season = NULL, type = "const")
-Model2 <- VAR(sv2, p = 6, season = NULL, type = "const") # adding more lags
-Model3 <- VAR(sv2, p = 2, season = NULL, type = "const") 
-SVARMod1 <- SVAR(Model1, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
-SVARMod2 <- SVAR(Model2, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
-SVARMod3 <- SVAR(Model3, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
-## Variables and VAR Forecasting
-```
-
-```{r}
-# Building Model for reduced sample
-
-sv83 <- cbind(y_t83,g_t83,r_t83)
-
-colnames(sv83) <- cbind("y_t83", "g_t83", "r_t83")
-
-lagselect <- VARselect(sv83, lag.max = 8, type = "both")
-
-Model83 <- VAR(sv83, p = 2, season = NULL, type = "const")
-SVARMod83 <- SVAR(Model83, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
-
-```
-
-```{r}
-# Building the model for r_t seasonally adjusted
-
-sv_sa <- cbind(y_t,g_t,r_t_sa)
-
-colnames(sv_sa) <- cbind("y_t", "g_t", "r_t_sa")
-sv_sa <- sv_sa[-188,]
-
-lagselect <- VARselect(sv_sa, lag.max = 8, type = "both")
-
-Model_sa <- VAR(sv_sa, p = 3, season = NULL, type = "const")
-SVARMod_sa <- SVAR(Model_sa, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
-```
 
 # Methodology
 
@@ -275,50 +144,21 @@ The authors make use of innovation accounting, which entails the consideration o
 
 In the original paper (2007), the impulse response functions of real GDP for each of the identified shocks are consistent with theoretical priors. The supply shock has a permanent impact on real GDP, while the demand shocks have transitionary impacts. In opposition, the results of this paper indicates that the the supply shock has a transitory impact while the demand shocks have permanent, negative impacts on real GDP.
 
-```{r}
-SVARy_t <- irf(SVARMod1, impulse = "y_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t, main = "Supply Shock", ylab="")
-
-SVARy_t <- irf(SVARMod1, impulse = "g_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t, main = "Fiscal Shock", ylab="")
-
-SVARr_t <- irf(SVARMod1, impulse = "r_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARr_t, main = "Monetary Shock", ylab="")
-
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-18-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-18-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-18-3.pdf)<!-- --> 
 
 \newpage
 ## Impulse Response of the real interest rate for each of the identified shocks
 
 The impulse response functions in the original paper suggest that a positive supply shock raises the real interest rate temporarily. This is also indicated in the results of this investigation, however, the real interest rate is slower to respond to the rise in the supply shock than in the original paper. Du Plessis, Smit and Sturzenegger (2007) find that  positive fiscal shock lowers the real interest rate temporarily, which indicates that a fiscal stimulus is met with accomodating monetary policy. However, this is not the result of this investigation. As indicated below, a positive fiscal shock results in a an increase in the real interest rate, which is slow to respond. 
 
-```{r}
-SVARr_t <- irf(SVARMod1, impulse = "y_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t, main = "Supply Shock", ylab="")
-
-SVARr_t <- irf(SVARMod1, impulse = "g_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t, main = "Fiscal Shock", ylab="")
-
-SVARr_t <- irf(SVARMod1, impulse = "r_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t, main = "Monetary Shock", ylab="")
-
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-19-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-19-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-19-3.pdf)<!-- --> 
 
 \newpage
 ## Impulse Response of the government consumption to real GDP for each of the identified shocks
 
 Du Plessis, Smit and Sturzenegger (2007)'s results find that GDP responds faster to a positive supply shock than government expenditure. The results of this investigative present a similar result, as indicated in the impulse response functions below. However, a positive supply shock results in government expenditure to fall below zero before moving back towards zero. The impulse response functions of the investigation indicate that a positive supply shock results in government expenditure to rise before moving back to zero. 
 
-```{r}
-SVARg_t <- irf(SVARMod1, impulse = "y_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t, main = "Supply Shock", ylab="")
-
-SVARg_t <- irf(SVARMod1, impulse = "g_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t, main = "Fiscal Shock", ylab="")
-
-SVARg_t <- irf(SVARMod1, impulse = "r_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t, main = "Monetary Shock", ylab="")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-20-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-20-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-20-3.pdf)<!-- --> 
 
 \newpage
 ## Variance Decomposition 
@@ -328,17 +168,9 @@ A variance decomposition indicates the amount of information that each variable 
 The variance decomposition of real GDP shows the proportion of the variance of real GDP which can be accounted for by the three identified shocks over various horizons. The first plot below is the variance decomposition of real GDP for the longer sample. The second plot presents the variance decomposition of real GDP for a shorter sample. In the larger sample, both $g_t$ and $r_t$ are initially dependent on the value they are set to be. However, as time passes, it is evident that $g_t$ and $r_t$ are impacted by $y_t$.
 
 
-```{r}
-library(vars)
-var_dec <- fevd(SVARMod1, n.ahead = 5)
-plot(var_dec)
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-21-1.pdf)<!-- --> 
 
-```{r}
-library(vars)
-var_dec83 <- fevd(SVARMod83, n.ahead = 5)
-plot(var_dec83)
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-22-1.pdf)<!-- --> 
 
 # Robustness Checks
 
@@ -348,9 +180,7 @@ In this section, four robustness checks are conducted to test whether estimated 
 
 For the last robustness check, the data used to calculate the real interest rate is seasonally adjusted. Further, the real interest rate data is differenced by 1, resulting in a stationary time series. As seen in the Appendix, the new, seasonally adjusted data that is differenced by 1 is stationary, with a p-value of 0.01 when an Aumented Dickey-Fuller test is conducted. The new real interest rate variable is depicted below:
 
-```{r}
-plot(r_t_sa, main = "Real interest rate: seasonally adjusted", xlab = "Time", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-23-1.pdf)<!-- --> 
 
 As depicted by the impulse response function of the real interest rate for each of the identified shocks in the Appendix, the method of removing seasonality and making the variable $r_t$ stationary, the new impulse response functions are more comparable to those of the original paper than previosuly. This indicates that removing seasonality from the main variables is essential. 
 
@@ -362,33 +192,25 @@ As the next robustness check, the residuals of the variables $y_t$, $g_t$, $r_t$
 Below is the result of a check for residuals for the $y_t$ variable. As indicated by the figures, the residuals of $y_t$ are white noise. The residuals are random, with no apparent trend. However, the autocorrelation in the second and third lags are significantly larger than zero. When conducting a Ljung_Box test, the p-value in greater that 0.01. As such we cannot reject the null hypothesis, indicating that the time series does not contain an autocorrelation.
 
 
-```{r}
-checkresiduals(y_t, lag, df = NULL, test = "LB", plot = TRUE)
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-24-1.pdf)<!-- --> 
 
 \newpage
 The figures below indicate that the residuals for the $g_t$ variable are not white noise. When conducting a Ljung-Box test, the p-value is smaller than 0.01, thus we can reject the null hypothesis. Therefore, the time series does contain an autocorrelation and  the residuals are not white noise.
 
 
-```{r}
-checkresiduals(g_t, lag, df = NULL, test = "LB", plot = TRUE)
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-25-1.pdf)<!-- --> 
 
 \newpage
 The figures below are checks for residuals for the $r_t$ variable. The figures indicate that the residuals are not white noise. The autocorrelation in all of the lags are larger than zero. The Ljung-Box test indicates that there is correlation in the time series, as the p-value is lower than 0.01.
 
 
-```{r}
-checkresiduals(r_t, lag, df = NULL, test = "LB", plot = TRUE)
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-26-1.pdf)<!-- --> 
 
 \newpage
 The figures below present a check for residuals for an interest rate variable that has been seasonally adjusted and made stationary. The residuals seem to be random, without an apparent trend. The autocorrelation in the first two lags are greater than zero. When conducting a Ljung-Box test, the p-value is less than 0.01. As such, we can reject the null hypothesis. Therefore, the time series contains autocorrelation, and the residuals are not white noise.
 
 
-```{r}
-checkresiduals(r_t_sa, lag, df = NULL, test = "LB", plot = TRUE)
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-27-1.pdf)<!-- --> 
 
 \newpage
 ## Lag Selection 
@@ -421,57 +243,115 @@ Ozcicek, O & McMillin, W. D. 1999. Lag Length Selection in Vector Autoregressive
 
 ## Forecast
 
-```{r}
-library(svars)
-forecast <- predict(Model1, n.ahead = 4, ci = 0.95)
-fan <- fanchart(forecast, names = "y_t", colors = "light blue", cis = NULL, main = "Real GDP", sub = "Figure 5", ylab =
-NULL, xlab = NULL, col.y = NULL, plot.type = c("multiple",
-"single"), mar = par("mar"), oma = par("oma"))
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-28-1.pdf)<!-- --> 
 
-```{r}
-fanchart(forecast, names = "g_t", colors = "light blue", cis = NULL, main = "Government Consumption to GDP ratio", sub = "Figure 6", ylab = NULL, xlab = NULL, col.y = NULL, plot.type = c("multiple",
-"single"), mar = par("mar"), oma = par("oma"))
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-29-1.pdf)<!-- --> 
 
-```{r}
-fanchart(forecast, names = "r_t", colors = "light blue", cis = NULL, main = "Real Interest Rate", sub = "Figure 7", ylab =
-NULL, xlab = NULL, col.y = NULL, plot.type = c("multiple",
-"single"), mar = par("mar"), oma = par("oma"))
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-30-1.pdf)<!-- --> 
 
 
 ## Testing for Stationarity
 
-```{r}
-library(tseries)
-adf.test(real_gdp1)
-adf.test(rg83)
 
-adf.test(Real_interest1$Real_interest_rate)
-adf.test(ri83$Real_interest_rate)
-adf.test(ri_sa$seasonally_differenced)
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  real_gdp1
+## Dickey-Fuller = -3.7922, Lag order = 5, p-value = 0.0208
+## alternative hypothesis: stationary
+```
 
-adf.test(g_g_not_s$Value)
-adf.test(gg83$Value)
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  rg83
+## Dickey-Fuller = -3.5737, Lag order = 4, p-value = 0.03979
+## alternative hypothesis: stationary
+```
+
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  Real_interest1$Real_interest_rate
+## Dickey-Fuller = -2.6335, Lag order = 5, p-value = 0.3112
+## alternative hypothesis: stationary
+```
+
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  ri83$Real_interest_rate
+## Dickey-Fuller = -2.7977, Lag order = 4, p-value = 0.2473
+## alternative hypothesis: stationary
+```
+
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  ri_sa$seasonally_differenced
+## Dickey-Fuller = -5.7783, Lag order = 5, p-value = 0.01
+## alternative hypothesis: stationary
+```
+
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  g_g_not_s$Value
+## Dickey-Fuller = -0.66065, Lag order = 5, p-value = 0.9724
+## alternative hypothesis: stationary
+```
+
+```
+## 
+## 	Augmented Dickey-Fuller Test
+## 
+## data:  gg83$Value
+## Dickey-Fuller = -2.3567, Lag order = 4, p-value = 0.4292
+## alternative hypothesis: stationary
 ```
 
 ## Ljung-Box Tests 
 
-```{r}
-Box.test(y_t, lag = 1, type = "Ljung")
+
+```
+## 
+## 	Box-Ljung test
+## 
+## data:  y_t
+## X-squared = 0.63753, df = 1, p-value = 0.4246
 ```
 
-```{r}
-Box.test(g_t, lag = 1, type = "Ljung")
+
+```
+## 
+## 	Box-Ljung test
+## 
+## data:  g_t
+## X-squared = 179.82, df = 1, p-value < 2.2e-16
 ```
 
-```{r}
-Box.test(r_t, lag = 1, type = "Ljung")
+
+```
+## 
+## 	Box-Ljung test
+## 
+## data:  r_t
+## X-squared = 181.77, df = 1, p-value < 2.2e-16
 ```
 
-```{r}
-Box.test(r_t_sa, lag = 1, type = "Ljung")
+
+```
+## 
+## 	Box-Ljung test
+## 
+## data:  r_t_sa
+## X-squared = 56.161, df = 1, p-value = 6.672e-14
 ```
 
 \newpage
@@ -479,171 +359,60 @@ Box.test(r_t_sa, lag = 1, type = "Ljung")
 
 Impulse Response of real GDP for each of the identified shocks:
 
-```{r}
-SVARy_t_sa <- irf(SVARMod_sa, impulse = "y_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t_sa, main ="Supply Shock", ylab = "")
-
-SVARy_t_sa <- irf(SVARMod_sa, impulse = "g_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t_sa, main ="Fiscal Shock", ylab = "")
-
-SVARr_t_sa <- irf(SVARMod_sa, impulse = "r_t_sa", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARr_t_sa, main ="Monetary Shock", ylab = "")
-
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-36-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-36-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-36-3.pdf)<!-- --> 
 \newpage
 Impulse Response of the real interest rate  for each of the identified shocks:
 
-```{r}
-SVARr_t_sa <- irf(SVARMod_sa, impulse = "y_t", response = "r_t_sa", n.ahead = 100)
-plot(SVARr_t_sa, main ="Supply Shock", ylab = "")
-
-SVARr_t_sa <- irf(SVARMod_sa, impulse = "g_t", response = "r_t_sa", n.ahead = 100)
-plot(SVARr_t_sa, main ="Fiscal Shock", ylab = "")
-
-SVARr_t_sa <- irf(SVARMod_sa, impulse = "r_t_sa", response = "r_t_sa", n.ahead = 100)
-plot(SVARr_t_sa, main ="Monetary Shock", ylab = "")
-
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-37-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-37-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-37-3.pdf)<!-- --> 
 \newpage
 Impulse Response of the government consumption to real GDP for each of the identified shocks:
 
-```{r}
-SVARg_t_sa <- irf(SVARMod_sa, impulse = "y_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t_sa, main ="Supply Shock", ylab = "")
-
-SVARg_t_sa <- irf(SVARMod_sa, impulse = "g_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t_sa, main ="Fiscal Shock", ylab = "")
-
-SVARg_t_sa <- irf(SVARMod_sa, impulse = "r_t_sa", response = "g_t", n.ahead = 100)
-plot(SVARg_t_sa, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-38-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-38-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-38-3.pdf)<!-- --> 
 
 \newpage
 ## Lag Selection Impulse Response Functions
 
 Impulse Response of the real GDP for each of the identified shocks:
 
-```{r}
-SVARy_t2 <- irf(SVARMod2, impulse = "y_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t2, main ="Supply Shock", ylab = "")
-
-SVARy_t2 <- irf(SVARMod2, impulse = "g_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t2, main ="Fiscal Shock", ylab = "")
-
-SVARy_t2 <- irf(SVARMod2, impulse = "r_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t2, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-39-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-39-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-39-3.pdf)<!-- --> 
 
 \newpage
 Impulse Response of the real interest rate for each of the identified shocks:
 
-```{r}
-SVARr_t2 <- irf(SVARMod2, impulse = "y_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t2, main ="Supply Shock", ylab = "")
-
-SVARr_t2 <- irf(SVARMod2, impulse = "g_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t2, main ="Fiscal Shock", ylab = "")
-
-SVARr_t2 <- irf(SVARMod2, impulse = "r_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t2, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-40-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-40-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-40-3.pdf)<!-- --> 
 
 \newpage
 Impulse Response of the government consumption to real GDP for each of the identified shocks:
 
-```{r}
-SVARg_t2 <- irf(SVARMod2, impulse = "y_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t2, main ="Supply Shock", ylab = "")
-
-SVARg_t2 <- irf(SVARMod2, impulse = "g_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t2, main ="Fiscal Shock", ylab = "")
-
-SVARg_t2 <- irf(SVARMod2, impulse = "r_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t2, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-41-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-41-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-41-3.pdf)<!-- --> 
 
 \newpage
 
 Impulse Response of the real GDP for each of the identified shocks:
 
-```{r}
-SVARy_t3 <- irf(SVARMod3, impulse = "y_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t3, main ="Supply Shock", ylab = "")
-
-SVARy_t3 <- irf(SVARMod3, impulse = "g_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t3, main ="Fiscal Shock", ylab = "")
-
-SVARy_t3 <- irf(SVARMod3, impulse = "r_t", response = "y_t", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t3, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-42-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-42-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-42-3.pdf)<!-- --> 
 
 \newpage
 Impulse Response of the real interest rate for each of the identified shocks:
 
-```{r}
-SVARr_t3 <- irf(SVARMod3, impulse = "y_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t3, main ="Supply Shock", ylab = "")
-
-SVARr_t3 <- irf(SVARMod3, impulse = "g_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t3, main ="Fiscal Shock", ylab = "")
-
-SVARr_t3 <- irf(SVARMod3, impulse = "r_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t3, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-43-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-43-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-43-3.pdf)<!-- --> 
 
 \newpage
 Impulse Response of the government consumption to real GDP for each of the identified shocks:
 
-```{r}
-SVARg_t3 <- irf(SVARMod3, impulse = "y_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t3, main ="Supply Shock", ylab = "")
-
-SVARg_t3 <- irf(SVARMod3, impulse = "g_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t3, main ="Fiscal Shock", ylab = "")
-
-SVARg_t3 <- irf(SVARMod3, impulse = "r_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t3, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-44-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-44-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-44-3.pdf)<!-- --> 
 
 \newpage
 ## Reduced Sample Impulse Response Functions
 
 Impulse Response of real GDP for each of the identified shocks:
 
-```{r}
-SVARy_t83 <- irf(SVARMod83, impulse = "y_t83", response = "y_t83", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t83, main ="Supply Shock", ylab = "")
-
-SVARy_t83 <- irf(SVARMod83, impulse = "g_t83", response = "y_t83", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t83, main ="Fiscal Shock", ylab = "")
-
-SVARy_t83 <- irf(SVARMod83, impulse = "r_t83", response = "y_t83", cumulative = TRUE, n.ahead = 100)
-plot(SVARy_t83, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-45-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-45-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-45-3.pdf)<!-- --> 
 \newpage
 Impulse Response of the real interest rate  for each of the identified shocks:
 
-```{r}
-SVARr_t83 <- irf(SVARMod83, impulse = "y_t83", response = "r_t83", n.ahead = 100)
-plot(SVARr_t83, main ="Supply Shock", ylab = "")
-
-SVARr_t83 <- irf(SVARMod83, impulse = "g_t83", response = "r_t83", n.ahead = 100)
-plot(SVARr_t83, main ="Fiscal Shock", ylab = "")
-
-SVARr_t83 <- irf(SVARMod83, impulse = "r_t83", response = "r_t83", n.ahead = 100)
-plot(SVARr_t83, main ="Monetary Shock", ylab = "")
-
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-46-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-46-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-46-3.pdf)<!-- --> 
 \newpage
 Impulse Response of the government consumption to real GDP for each of the identified shocks:
 
-```{r}
-SVARg_t83 <- irf(SVARMod83, impulse = "y_t83", response = "g_t83", n.ahead = 100)
-plot(SVARg_t83, main ="Supply Shock", ylab = "")
-
-SVARg_t83 <- irf(SVARMod83, impulse = "g_t83", response = "g_t83", n.ahead = 100)
-plot(SVARg_t83, main ="Fiscal Shock", ylab = "")
-
-SVARg_t83 <- irf(SVARMod83, impulse = "r_t83", response = "g_t83", n.ahead = 100)
-plot(SVARg_t83, main ="Monetary Shock", ylab = "")
-```
+![](TS_proj_files/figure-latex/unnamed-chunk-47-1.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-47-2.pdf)<!-- --> ![](TS_proj_files/figure-latex/unnamed-chunk-47-3.pdf)<!-- --> 
