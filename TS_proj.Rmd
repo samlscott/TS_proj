@@ -80,32 +80,23 @@ gdp <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/gdp.csv")
 price_deflator <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/price_deflator.csv")
 g_g_not_s <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/g_g_not_s.csv")
 Real_interest <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/FRED/Real_interest.csv")
+ri_sa <- read_csv("/Users/samanthascott/Desktop/TS_proj/new_data/ri_sa.csv") #seasonally adjusted data
 ```
 
 ```{r}
+# Nominal GDP -> reducing to applicable years
 gdp1 <- gdp[1:188,]
 ```
 
 ```{r}
-Real_interest1 <- Real_interest[1:188,]
-```
-
-```{r}
+# used to calculate real GDP
 price_deflator1 <- price_deflator[1:188,]
 ```
 
 ```{r}
-Real_interest1$year<- as.yearqtr(paste0(Real_interest1$year, "-", Real_interest1$quarter))
-```
-
-# Introduction
-
-The paper, *Identifying aggregate supply and demand shocks in South Africa*, is an application of a structural VAR method to identify supply and demand shocks for the South African economy since the 1960s. 
-
-```{r}
 # creating real_gdp df
-real_gdp <- gdp1$ZAFGDPNQDSMEI/price_deflator1$ZAFGDPDEFQISMEI
-realgdp <- as.data.frame(real_gdp)
+real_gdp1 <- gdp1$ZAFGDPNQDSMEI/price_deflator1$ZAFGDPDEFQISMEI
+realgdp <- as.data.frame(real_gdp1)
 ```
 
 ```{r}
@@ -113,36 +104,70 @@ realgdp <- as.data.frame(real_gdp)
 y_t1 <- log(realgdp)
 
 # Calculate the first difference of AirPass using lag and subtraction
-diff_by_hand <- y_t1$real_gdp - lag(y_t1$real_gdp)
-real_gdp1 <- as.data.frame(diff_by_hand) # this is the change in y_t
-real_gdp1 <- real_gdp1[-1,]
+real_gdp <- y_t1$real_gdp - lag(y_t1$real_gdp)
+real_gdp <- as.data.frame(real_gdp) # this is the change in y_t
+real_gdp1 <- real_gdp[-1,]
 ```
 
-# Data 
+```{r}
+# reducing to applicable years
+Real_interest1 <- Real_interest[1:188,]
+ri_sa <- ri_sa[1:188,]
+```
 
 ```{r}
+# joing year and quarter columns
+Real_interest1$year<- as.yearqtr(paste0(Real_interest1$year, "-", Real_interest1$quarter))
+```
 
+```{r}
+# making variables ts
 y_t <- ts(real_gdp1, start (1960,2))
 g_t <- ts(g_g_not_s$Value, start (1960,2))
 r_t <- ts(Real_interest1$Real_interest_rate, start (1960,2))
+r_t_sa <- ts(ri_sa$seasonally_differenced, start (1960,2)) # seasonally adjusted real interest rate
 ```
+
+```{r}
+# reduced sample (+1983) from original sample (+1960)
+gg83 <- g_g_not_s[95:187,]
+ri83 <- Real_interest1[96:188,]
+rg83 <- real_gdp$real_gdp[96:188]
+```
+
+```{r}
+# reduced data variables 
+y_t83 <- ts(rg83, start (1983,4))
+g_t83 <- ts(gg83$Value, start (1983,4))
+r_t83 <- ts(ri83$Real_interest_rate, start (1983,4))
+```
+
+# Introduction
+
+The paper, *Identifying aggregate supply and demand shocks in South Africa*, is an application of a structural VAR method to identify supply and demand shocks for the South African economy since the 1960s. The aim of this paper is to replicate the paper by Du Plessis, Smit and Sturzenegger (2008), with 
+
+# Data 
+
+The data used is quarterly data from FRED, dating back to 1960 up until 2007. Unlike the original paper, the data used is not seasonally adjusted. The variables used in the model are the first difference of the log of GDP ($y_t$), the ratio of government consumption to GDP ($g_t$), as well the real interest rate ($r_t$). $r_t$ is calculated using the monthly nominal interest rate as well as the monthly CPI data. Below is the equation used to caluclate $r_t$.
+
+$$ r_t = ((1 + Avg(i_{mt-1}, i_{mt}, i_{mt+1}))/(1+(ln(CPI_{mt-2}) - ln(CPI_{mt+1}))) ^ 4 - 1)*100 $$
+Figures 1, 2 and 3 represent the variables used. As seen in the Appendix, when as Augmented Dickey-Fuller test is conducted, it is evident that $y_t$ is stationary, as the p-value is less than 0.05. However, both $g_t$ and $r_t$ are non-stationary. In the original paper (2007), $r_t$ is stationary. This may be due to the data used for this paper not being seasonally adjusted. 
 
 ```{r}
 # Plot the Series
 #ts_plot(y_t)
-#plot(y_t, main = "First difference of logged real GDP", xlab = "Time", ylab = "")
+plot(y_t, main = "First difference of logged real GDP", sub = "Figure 1", xlab = "Time", ylab = "")
 ```
 
 ```{r}
 #ts_plot(g_t)
-#plot(g_t, main = "Ratio of government expenditure to GDP", xlab = "Time", ylab = "")
+plot(g_t, main = "Ratio of government expenditure to GDP", sub = "Figure 2", xlab = "Time", ylab = "")
 ```
 
 ```{r}
 #ts_plot(r_t)
-#plot(r_t, main = "Real interest rate", xlab = "Time", ylab = "")
+plot(r_t, main = "Real interest rate", sub = "Figure 3", xlab = "Time", ylab = "")
 ```
-
 
 ```{r echo = FALSE}
 
@@ -152,10 +177,6 @@ amat <- diag(3)
 amat[2,1] <- NA
 amat[3,1] <- NA
 amat[3,2] <- NA
-```
-
-
-```{r}
 
 #Building the model
 
@@ -167,62 +188,74 @@ colnames(sv2) <- cbind("y_t", "g_t", "r_t")
 lagselect <- VARselect(sv2, lag.max = 8, type = "both")
 
 Model1 <- VAR(sv2, p = 3, season = NULL, type = "const")
+Model2 <- VAR(sv2, p = 6, season = NULL, type = "const") # adding more lags
+Model3 <- VAR(sv2, p = 2, season = NULL, type = "const") 
 SVARMod1 <- SVAR(Model1, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
-```
-
-
+SVARMod2 <- SVAR(Model2, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
+SVARMod3 <- SVAR(Model3, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
 ## Variables and VAR Forecasting
-
-```{r}
-library(svars)
-forecast <- predict(Model1, n.ahead = 4, ci = 0.95)
-fanchart(forecast, names = "y_t")
 ```
 
 ```{r}
-fanchart(forecast, names = "g_t")
+# Building Model for reduced sample
+
+sv83 <- cbind(y_t83,g_t83,r_t83)
+
+colnames(sv83) <- cbind("y_t83", "g_t83", "r_t83")
+
+lagselect <- VARselect(sv83, lag.max = 8, type = "both")
+
+Model83 <- VAR(sv83, p = 2, season = NULL, type = "const")
+SVARMod83 <- SVAR(Model83, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
+
 ```
 
 ```{r}
-fanchart(forecast, names = "r_t")
-```
+# Building the model for r_t seasonally adjusted
 
-# Impulse Response Functions
+sv_sa <- cbind(y_t,g_t,r_t_sa)
+
+colnames(sv_sa) <- cbind("y_t", "g_t", "r_t_sa")
+sv_sa <- sv_sa[-188,]
+
+lagselect <- VARselect(sv_sa, lag.max = 8, type = "both")
+
+Model_sa <- VAR(sv_sa, p = 3, season = NULL, type = "const")
+SVARMod_sa <- SVAR(Model_sa, Amat = amat, Bmat = NULL, hession = TRUE, estmethod = c("scoring", "direct"))
+```
+# Methodology
+
+A structural VAR model is created to identify supply and demand shocks for the South African economy since the 1960s. The demand the variables, $y_t$, $g_t$ and $r_t$ are proxies for a supply shock, a fiscal shock and a monetary shock, respectively.
+
+# Results
+
+The results of the model are presented as impulse response functions. 
 
 ## Impulse Response of real GDP for each of the identified shocks
 
 ```{r}
 SVARy_t <- irf(SVARMod1, impulse = "y_t", response = "y_t", n.ahead = 100)
-plot(SVARy_t, ylab="")
-```
+plot(SVARy_t, main = "Supply Shock", ylab="")
 
-```{r}
 SVARy_t <- irf(SVARMod1, impulse = "g_t", response = "y_t", n.ahead = 100)
-plot(SVARy_t, ylab="")
-```
+plot(SVARy_t, main = "Fiscal Shock", ylab="")
 
-```{r}
-SVARy_t <- irf(SVARMod1, impulse = "r_t", response = "y_t", n.ahead = 100)
-plot(SVARy_t, ylab="")
+SVARr_t <- irf(SVARMod1, impulse = "r_t", response = "y_t", n.ahead = 100)
+plot(SVARr_t, main = "Monetary Shock", ylab="")
+
 ```
 
 ## Impulse Response of the real interest rate  for each of the identified shocks
 
 ```{r}
 SVARr_t <- irf(SVARMod1, impulse = "y_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t, ylab="")
+plot(SVARr_t, main = "Supply Shock", ylab="")
 
-```
-
-```{r}
 SVARr_t <- irf(SVARMod1, impulse = "g_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t, ylab="")
+plot(SVARr_t, main = "Fiscal Shock", ylab="")
 
-```
-
-```{r}
 SVARr_t <- irf(SVARMod1, impulse = "r_t", response = "r_t", n.ahead = 100)
-plot(SVARr_t, ylab="")
+plot(SVARr_t, main = "Monetary Shock", ylab="")
 
 ```
 
@@ -230,33 +263,70 @@ plot(SVARr_t, ylab="")
 
 ```{r}
 SVARg_t <- irf(SVARMod1, impulse = "y_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t, ylab="")
-```
+plot(SVARg_t, main = "Supply Shock", ylab="")
 
-```{r}
 SVARg_t <- irf(SVARMod1, impulse = "g_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t, ylab="")
-```
+plot(SVARg_t, main = "Fiscal Shock", ylab="")
 
-```{r}
 SVARg_t <- irf(SVARMod1, impulse = "r_t", response = "g_t", n.ahead = 100)
-plot(SVARg_t, ylab="")
+plot(SVARg_t, main = "Monetary Shock", ylab="")
 ```
 
-# Variance Decomposition 
+## Variance Decomposition 
 
 "The variance decomposition indicates the amount of information each variable contributes to the other variables in the autoregression. It determines how much of the forecast error variance of each of the variables can be explained by exogenous shocks to the other variables."
 
-# Historical Decomposition 
-
+```{r}
+library(vars)
+var_dec <- fevd(SVARMod1, n.ahead = 5)
+plot(var_dec, subtitle = "54")
+```
 
 # Robustness Checks
 
-```{r}
-# calculation inflation
+## Residuals 
 
+checking if residuals are white noise
+
+"The residuals are the differences between the fitted model and the data. In a signal-plus-white noise model, if you have a good fit for the signal, the residuals should be white noise."
+
+Below is a check for residuals for the $y_t$ variable. This helps to determine whether the residual are white noise.
+
+```{r}
+checkresiduals(y_t)
 ```
 
+Below is a check for residuals for the $g_t$ variable.
+
+```{r}
+checkresiduals(g_t)
+```
+
+Below is a check for residuals for the $r_t$ variable.
+
+```{r}
+checkresiduals(r_t)
+```
+
+## Lag Selection 
+
+"Lütkepohl (1993) indicates that overfitting (selecting a higher order lag length than the true lag length) causes an increase in the mean-squareforecast errors of the VAR and that underfitting the lag length often generates autocorrelated
+errors."
+
+The first set of Impulse Response Functions below are presented using a second SVAR model, where the number of lags selected is 6.
+
+
+## Reduced Sample (from last quarter, 1983)
+
+As another robustness check, a smaller sample is used and the same method applied. As seen by the impulse response functions in the Appendix, using a smaller sample (1983+) does not significantly impact the results, as they are comparable to the impulse response functions of the larger sample (1960+).
+
+## Removing seasonality and making Real Interest Rate Stationary
+
+For the last robustness check, the data used to calculate the real interest rate is seasonally adjusted. Further, the real interest rate data is differenced by 1, resulting in a stationary time series. As seen in the Appendix, the new, seasonally adjusted data that is differenced by 1 is stationary, with a p-value of 0.01 when an Aumented Dickey-Fuller test is conducted. The new real interest rate variable is depicted below:
+
+```{r}
+plot(r_t_sa, main = "Real interest rate: seasonally adjusted", xlab = "Time", ylab = "")
+```
 
 # Conclusion 
 
@@ -266,28 +336,214 @@ plot(SVARg_t, ylab="")
 
 Du Plessis, S., Smit, B. and Sturzenegger, F., 2008. Identifying aggregate supply and demand shocks in South Africa. Journal of African economies, 17(5), pp.765-793.
 
+Ozcicek, O. Lag Length Selection in Vector Autoregressive Models: Symmetric and Asymmetric Lags. Working Paper. https://www.lsu.edu/business/economics/files/workingpapers/pap97_27.pdf 
+
 \newpage
 
 # Appendix 
+
+## Forecast
+
+```{r}
+library(svars)
+forecast <- predict(Model1, n.ahead = 4, ci = 0.95)
+fan <- fanchart(forecast, names = "y_t", colors = "light blue", cis = NULL, main = "Real GDP", sub = "Figure 5", ylab =
+NULL, xlab = NULL, col.y = NULL, plot.type = c("multiple",
+"single"), mar = par("mar"), oma = par("oma"))
+```
+
+```{r}
+fanchart(forecast, names = "g_t", colors = "light blue", cis = NULL, main = "Government Consumption to GDP ratio", sub = "Figure 6", ylab = NULL, xlab = NULL, col.y = NULL, plot.type = c("multiple",
+"single"), mar = par("mar"), oma = par("oma"))
+```
+
+```{r}
+fanchart(forecast, names = "r_t", colors = "light blue", cis = NULL, main = "Real Interest Rate", sub = "Figure 7", ylab =
+NULL, xlab = NULL, col.y = NULL, plot.type = c("multiple",
+"single"), mar = par("mar"), oma = par("oma"))
+```
 
 ## Testing for Stationarity
 
 ```{r}
 library(tseries)
 adf.test(real_gdp1)
+adf.test(rg83)
 
-library(tseries)
 adf.test(Real_interest1$Real_interest_rate)
+adf.test(ri83$Real_interest_rate)
+adf.test(ri_sa$seasonally_differenced)
 
-library(tseries)
 adf.test(g_g_not_s$Value)
+adf.test(gg83$Value)
+```
+
+## Lag Selection Impulse Response Functions
+
+The set of Impulse Response Functions presented below are created using a second SVAR model, where the number of lags selected is 6. 
+
+Impulse Response of the real GDP for each of the identified shocks:
+
+```{r}
+SVARy_t2 <- irf(SVARMod2, impulse = "y_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t2, main ="Supply Shock", ylab = "")
+
+SVARy_t2 <- irf(SVARMod2, impulse = "g_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t2, main ="Fiscal Shock", ylab = "")
+
+SVARy_t2 <- irf(SVARMod2, impulse = "r_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t2, main ="Monetary Shock", ylab = "")
+```
+
+Impulse Response of the real interest rate for each of the identified shocks:
+
+```{r}
+SVARr_t2 <- irf(SVARMod2, impulse = "y_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t2, main ="Supply Shock", ylab = "")
+
+SVARr_t2 <- irf(SVARMod2, impulse = "g_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t2, main ="Fiscal Shock", ylab = "")
+
+SVARr_t2 <- irf(SVARMod2, impulse = "r_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t2, main ="Monetary Shock", ylab = "")
+```
+
+Impulse Response of the government consumption to real GDP for each of the identified shocks:
+
+```{r}
+SVARg_t2 <- irf(SVARMod2, impulse = "y_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t2, main ="Supply Shock", ylab = "")
+
+SVARg_t2 <- irf(SVARMod2, impulse = "g_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t2, main ="Fiscal Shock", ylab = "")
+
+SVARg_t2 <- irf(SVARMod2, impulse = "r_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t2, main ="Monetary Shock", ylab = "")
+```
+
+The set of Impulse Response Functions presented below are created using a third SVAR model, where the number of lags selected is 2. 
+
+Impulse Response of the real GDP for each of the identified shocks:
+
+```{r}
+SVARy_t3 <- irf(SVARMod3, impulse = "y_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t3, main ="Supply Shock", ylab = "")
+
+SVARy_t3 <- irf(SVARMod3, impulse = "g_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t3, main ="Fiscal Shock", ylab = "")
+
+SVARy_t3 <- irf(SVARMod3, impulse = "r_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t3, main ="Monetary Shock", ylab = "")
+```
+
+Impulse Response of the real interest rate for each of the identified shocks:
+
+```{r}
+SVARr_t3 <- irf(SVARMod3, impulse = "y_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t3, main ="Supply Shock", ylab = "")
+
+SVARr_t3 <- irf(SVARMod3, impulse = "g_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t3, main ="Fiscal Shock", ylab = "")
+
+SVARr_t3 <- irf(SVARMod3, impulse = "r_t", response = "r_t", n.ahead = 100)
+plot(SVARr_t3, main ="Monetary Shock", ylab = "")
+```
+
+Impulse Response of the government consumption to real GDP for each of the identified shocks:
+
+```{r}
+SVARg_t3 <- irf(SVARMod3, impulse = "y_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t3, main ="Supply Shock", ylab = "")
+
+SVARg_t3 <- irf(SVARMod3, impulse = "g_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t3, main ="Fiscal Shock", ylab = "")
+
+SVARg_t3 <- irf(SVARMod3, impulse = "r_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t3, main ="Monetary Shock", ylab = "")
 ```
 
 
-## Variance Decomposition Results 
+## Reduced Sample Impulse Response Functions
+
+Impulse Response of real GDP for each of the identified shocks:
 
 ```{r}
-library(vars)
-var_dec <- fevd(SVARMod1, n.ahead = 20)
-plot(var_dec)
+SVARy_t83 <- irf(SVARMod83, impulse = "y_t83", response = "y_t83", n.ahead = 100)
+plot(SVARy_t83, main ="Supply Shock", ylab = "")
+
+SVARy_t83 <- irf(SVARMod83, impulse = "g_t83", response = "y_t83", n.ahead = 100)
+plot(SVARy_t83, main ="Fiscal Shock", ylab = "")
+
+SVARy_t83 <- irf(SVARMod83, impulse = "r_t83", response = "y_t83", n.ahead = 100)
+plot(SVARy_t83, main ="Monetary Shock", ylab = "")
+```
+
+Impulse Response of the real interest rate  for each of the identified shocks:
+
+```{r}
+SVARr_t83 <- irf(SVARMod83, impulse = "y_t83", response = "r_t83", n.ahead = 100)
+plot(SVARr_t83, main ="Supply Shock", ylab = "")
+
+SVARr_t83 <- irf(SVARMod83, impulse = "g_t83", response = "r_t83", n.ahead = 100)
+plot(SVARr_t83, main ="Fiscal Shock", ylab = "")
+
+SVARr_t83 <- irf(SVARMod83, impulse = "r_t83", response = "r_t83", n.ahead = 100)
+plot(SVARr_t83, main ="Monetary Shock", ylab = "")
+
+```
+
+Impulse Response of the government consumption to real GDP for each of the identified shocks:
+
+```{r}
+SVARg_t83 <- irf(SVARMod83, impulse = "y_t83", response = "g_t83", n.ahead = 100)
+plot(SVARg_t83, main ="Supply Shock", ylab = "")
+
+SVARg_t83 <- irf(SVARMod83, impulse = "g_t83", response = "g_t83", n.ahead = 100)
+plot(SVARg_t83, main ="Fiscal Shock", ylab = "")
+
+SVARg_t83 <- irf(SVARMod83, impulse = "r_t83", response = "g_t83", n.ahead = 100)
+plot(SVARg_t83, main ="Monetary Shock", ylab = "")
+```
+
+## Removing Seasonality and Non-stationarity Impulse Response Functions
+
+Impulse Response of real GDP for each of the identified shocks:
+
+```{r}
+SVARy_t_sa <- irf(SVARMod_sa, impulse = "y_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t_sa, main ="Supply Shock", ylab = "")
+
+SVARy_t_sa <- irf(SVARMod_sa, impulse = "g_t", response = "y_t", n.ahead = 100)
+plot(SVARy_t_sa, main ="Fiscal Shock", ylab = "")
+
+SVARr_t_sa <- irf(SVARMod_sa, impulse = "r_t_sa", response = "y_t", n.ahead = 100)
+plot(SVARr_t_sa, main ="Monetary Shock", ylab = "")
+
+```
+
+Impulse Response of the real interest rate  for each of the identified shocks:
+
+```{r}
+SVARr_t_sa <- irf(SVARMod_sa, impulse = "y_t", response = "r_t_sa", n.ahead = 100)
+plot(SVARr_t_sa, main ="Supply Shock", ylab = "")
+
+SVARr_t_sa <- irf(SVARMod_sa, impulse = "g_t", response = "r_t_sa", n.ahead = 100)
+plot(SVARr_t_sa, main ="Fiscal Shock", ylab = "")
+
+SVARr_t_sa <- irf(SVARMod_sa, impulse = "r_t_sa", response = "r_t_sa", n.ahead = 100)
+plot(SVARr_t_sa, main ="Monetary Shock", ylab = "")
+
+```
+
+Impulse Response of the government consumption to real GDP for each of the identified shocks:
+
+```{r}
+SVARg_t_sa <- irf(SVARMod_sa, impulse = "y_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t_sa, main ="Supply Shock", ylab = "")
+
+SVARg_t_sa <- irf(SVARMod_sa, impulse = "g_t", response = "g_t", n.ahead = 100)
+plot(SVARg_t_sa, main ="Fiscal Shock", ylab = "")
+
+SVARg_t_sa <- irf(SVARMod_sa, impulse = "r_t_sa", response = "g_t", n.ahead = 100)
+plot(SVARg_t_sa, main ="Monetary Shock", ylab = "")
 ```
